@@ -1,5 +1,14 @@
 # Python3 code for the above approach
 
+#plaintext to hexadecimal
+
+def pt2hex(s):
+	hex_s = s.encode('utf-8')
+	hex_s = hex_s.hex()
+	return hex_s.upper()
+
+
+
 # Hexadecimal to binary conversion
 
 
@@ -245,9 +254,10 @@ def encrypt(pt, rkb, rk):
 	return cipher_text
 
 
-pt = "123456ABCD132536"
+entrada = "123RADWAASDADKSA"
 key = "AABB09182736CCDD"
-
+pt = pt2hex(entrada)
+print(pt)
 # Key generation
 # --hex to binary
 key = hex2bin(key)
@@ -311,4 +321,3 @@ rk_rev = rk[::-1]
 text = bin2hex(encrypt(cipher_text, rkb_rev, rk_rev))
 print("Plain Text : ", text)
 
-# This code is contributed by Aditya Jain
