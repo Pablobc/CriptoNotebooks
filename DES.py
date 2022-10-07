@@ -28,11 +28,6 @@ def pt2hex(s):
 	hex_s = hex_s.hex()
 	return hex_s.upper()
 
-def inverse_permutation(a):
-    b = np.arange(a.shape[0])
-    b[a] = b.copy()
-    return b
-
 # Hexadecimal to binary conversion
 
 
