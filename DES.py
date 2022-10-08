@@ -3,10 +3,12 @@
 #plaintext to hexadecimal
 import random
 
-bloquept = 64
+bloquept = 8
 mediobloquept = int(bloquept/2)
-tamaniollave = 64
-tamaniosubllave = 48
+tamaniollave = 8
+tamaniosubllave = 6
+cantSbox = int(tamaniosubllave/6)
+salidaSbox = int(mediobloquept/cantSbox)
 
 def generatePermTab(n):
 	table=[*range(1,n+1,1)]
@@ -146,7 +148,7 @@ def xor(a, b):
 	return ans
 
 def sbox(sixbits):
-	return sixbits[len(sixbits)- 2:]
+	return sixbits[:len(sixbits) - (len(sixbits)-salidaSbox)]
 
 # Table of Position of 64 bits at initial level: Initial Permutation Table
 initial_perm = generatePermTab(bloquept)
@@ -159,36 +161,33 @@ per = generatePermTab(mediobloquept)
 
 
 # Final Permutation Table
-final_perm = initial_perm
-final_perm.reverse()
+final_perm = generatePermTab(bloquept)
 
 
 def encrypt(pt, rkb, rk):
 	pt = hex2bin(pt)
 
 	# Initial Permutation
-	pt = permute(pt, initial_perm, 64)
-	print(pt)
-	print("After initial permutation", bin2hex(pt))
+	pt = permute(pt, initial_perm, bloquept)
+	#print("After initial permutation", bin2hex(pt))
 
 	# Splitting
-	left = pt[0:32]
-	right = pt[32:64]
+	left = pt[0:mediobloquept]
+	right = pt[mediobloquept:bloquept]
 	for i in range(0, 16):
 		# Expansion D-box: Expanding the 32 bits data into 48 bits
-		right_expanded = permute(right, exp_d, 48)
+		right_expanded = permute(right, exp_d, tamaniosubllave)
 
 		# XOR RoundKey[i] and right_expanded
 		xor_x = xor(right_expanded, rkb[i])
-
 		# S-boxex: substituting the value from s-box table by calculating row and column
 		sbox_str = ""
-		for j in range(0, 8):
-			sixbits=xor_x[j*6:(j*6)+5]
-			sbox_str = sbox_str + sixbits
-
+		for j in range(0, cantSbox):
+			sixbits=xor_x[j*6:(j*6)+6]
+			sbox_str = sbox_str + sbox(sixbits)
+		
 		# Straight D-box: After substituting rearranging the bits
-		sbox_str = permute(sbox_str, per, 32)
+		sbox_str = permute(sbox_str, per, mediobloquept)
 
 		# XOR left and sbox_str
 		result = xor(left, sbox_str)
@@ -197,20 +196,19 @@ def encrypt(pt, rkb, rk):
 		# Swapper
 		if(i != 15):
 			left, right = right, left
-		print("Round ", i + 1, " ", bin2hex(left),
-			" ", bin2hex(right), " ", rk[i])
+		print("Round ", i + 1, " ", left,
+			" ", right, " ", rkb[i])
 
 	# Combination
 	combine = left + right
 
 	# Final permutation: final rearranging of bits to get cipher text
-	cipher_text = permute(combine, final_perm, 64)
+	cipher_text = permute(combine, final_perm, bloquept)
 	return cipher_text
 
 
 entrada = "123RADWAASDADKSA"
 key = "AABB09182736CCDD"
-
 
 pt = pt2hex(entrada)
 print(pt)
@@ -243,17 +241,11 @@ for i in range(0, 16):
 
 	# Compression of key from 56 to 48 bits
 	round_key = permute(combine_str, key_comp, tamaniosubllave)
-
 	rkb.append(round_key)
-	rk.append(bin2hex(round_key))
+	#rk.append(bin2hex(round_key))
 
 print("Encryption")
 cipher_text = bin2hex(encrypt(pt, rkb, rk))
 print("Cipher Text : ", cipher_text)
 
-print("Decryption")
-rkb_rev = rkb[::-1]
-rk_rev = rk[::-1]
-text = bin2hex(encrypt(cipher_text, rkb_rev, rk_rev))
-print("Plain Text : ", text)
 
