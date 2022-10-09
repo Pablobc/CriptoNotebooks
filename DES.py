@@ -164,7 +164,7 @@ per = generatePermTab(mediobloquept)
 final_perm = generatePermTab(bloquept)
 
 
-def encrypt(pt, rkb, rk):
+def encrypt(pt, rkb):
 	pt = hex2bin(pt)
 
 	# Initial Permutation
@@ -245,7 +245,7 @@ for i in range(0, 16):
 	#rk.append(bin2hex(round_key))
 
 print("Encryption")
-cipher_text = bin2hex(encrypt(pt, rkb, rk))
+cipher_text = bin2hex(encrypt(pt, rkb))
 print("Cipher Text : ", cipher_text)
 
 
